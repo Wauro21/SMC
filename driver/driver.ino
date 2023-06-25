@@ -1,45 +1,41 @@
+#include "constants.h"
+#include "driver_functions.h"
+
 // When two commands are sent they overwrite each other -> Add stack or something like that
 
-const byte outPin = 9;
-const byte dirPin = 7; // Temporal
-
-int direction = 0;
-
+// Allow for halt flag 
+volatile bool halt = false;
 volatile int interruptCounter = 0;
-int steps_to_perform = 0;
+int interrupts_to_steps = 0;
 int cmd = 0;
-void stopTimer1(){
-  TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
-  TCNT1 = 0;
-}
 
-void startTimer1(){
-  TCCR1B |= (0 << CS12) | (1 << CS11) | (1 << CS10);
-}
 
-void setup() {  
+void setup() {
 
+  /// Setup serial communication for control
   Serial.begin(9600);
-  // put your setup code here, to run once:
-    pinMode(outPin, OUTPUT);
-    pinMode(dirPin, OUTPUT);
 
-    // Default direction
-    digitalWrite(dirPin, direction);
+  /// Pin mode initialization
+  pinMode(outPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(highSwitch, INPUT_PULLUP); /// Interrupt mode
+  pinMode(lowSwitch, INPUT_PULLUP);  /// Interrupt mode
 
-    // put your main code here, to run repeatedly:
-    TCCR1A = 0; // set entire TCCR1A register to 0
-    TCCR1B = 0; // same for TCCR1B
-    TCCR1C = 0;
-    TCNT1  = 0; // initialize counter value to 0
-    OCR1A = 15624; // = 16000000 / (64 * 8) - 1 (must be <65536)
+  /// Default values for I/O
+  digitalWrite(outPin, LOW);
+  digitalWrite(dirPin, LOW);
 
-    // Register setup
-    TCCR1B |= (1 << WGM12);
-    TCCR1A |= (0 << COM1A1) | (1 << COM1A0);
-    // TCCR1C |= (1 << FOC1A);
-    TIMSK1 |= (1 << OCIE1A);
-    sei(); // allow interrupts
+  /// Attach intterupt to switch pins
+  attachInterrupt(digitalPinToInterrupt(highSwitch), limitHalt, LOW);
+  attachInterrupt(digitalPinToInterrupt(lowSwitch), limitHalt, LOW);
+
+  confTimer1(); /// Setup timer configuration
+  sei(); /// allow interrupts
+}
+
+void limitHalt(){
+  Serial.println("I should really stop here...");
+
 }
 
 void loop() {
@@ -48,37 +44,14 @@ void loop() {
   if(Serial.available()){
     // Read CMD
     cmd = Serial.parseInt(SKIP_ALL);
-    step(1, cmd);
+    step(false, cmd, &interrupts_to_steps);
   }
 }
-
-
-void step(int dir, int steps){
-
-  if(steps == 0) {
-    Serial.println("not a valid number of steps!");
-    return;
-  }
-
-  // Set direction
-  digitalWrite(dirPin, dir);
-
-  // Calculate necessary values for counter - TO BE IMPLEMENTED 
-
-  // set number of interrupts to count
-  steps_to_perform = 2*steps-1;
-
-  // Start timer
-  startTimer1();
-  Serial.print("STEPPING ");
-  Serial.println(steps, DEC);
-}
-
 
 
 ISR(TIMER1_COMPA_vect){
 
-  if(interruptCounter < steps_to_perform) interruptCounter+=1;
+  if(interruptCounter < interrupts_to_steps) interruptCounter+=1;
   else{
     stopTimer1();
     interruptCounter = 0;
