@@ -1,5 +1,6 @@
 #include "constants.h"
 #include "driver_functions.h"
+#include <Arduino.h>
 
 void confTimer1(int max_counter=15624){
 
@@ -74,5 +75,68 @@ void step(bool direction, int steps, int* n_interrupts){
     /// Inform via serial what's being done
     Serial.print("Stepping ");
     Serial.println(steps, DEC);   
+
+}
+
+States cmdDecoder(byte serial_in){
+
+    byte cmd = serial_in >> 6;
+
+    switch(cmd){
+        case STEP_CMD: return STEP;
+        case SETUP_CMD: return SETUP;
+        default: return IDLE;
+    }
+};
+
+void setupDecoder(byte serial_in, byte* m_s, bool* reset, bool* enable, bool* sleep){
+    *m_s = (serial_in & 0x38) >> 3;
+    *reset = (serial_in & 0x04) >> 2;
+    *enable = (serial_in & 0x02) >> 1;
+    *sleep = (serial_in & 0x01);
+
+    /// Unpack to bit-like value before assignement
+    byte ms2 = (*m_s >> 2);
+    byte ms1 = (*m_s >> 2);
+    byte ms0 = (*m_s & 0x01);
+
+    /// Apply to pinout
+    digitalWrite(ms2Pin, ms2); /// Pin 2 of microstepping controls
+    digitalWrite(ms1Pin, ms1); /// Pin 1 of microstepping controls
+    digitalWrite(ms0Pin, ms0); /// Pin 0 of microstepping controls
+    digitalWrite(resetPin, *reset); 
+    digitalWrite(enablePin, *enable);
+    digitalWrite(sleepPin, *sleep);
+}
+
+
+
+void ctrlFSM(volatile States* state, byte* control_packet, byte* m_s, bool* reset, bool* enable, bool* sleep){
+
+    switch(*state){
+        case IDLE:{            
+            if(Serial.available()){
+                *control_packet = Serial.read();
+                Serial.print("Readed cmd: ");
+                Serial.println(*control_packet, HEX);
+                *state = cmdDecoder(*control_packet);
+            }
+            else *state = IDLE;
+            break;
+        }
+
+        case SETUP:{
+            Serial.println("SETUP-STATE");
+            setupDecoder(*control_packet, m_s, reset, enable, sleep);
+            *state = IDLE;
+            break;
+        }
+
+        default:{
+            Serial.print("State was");
+            Serial.println(*state, HEX);
+            *state = IDLE;
+        }
+    }
 
 }
