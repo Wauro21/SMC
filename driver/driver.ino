@@ -4,8 +4,8 @@
 
 // Allow for halt flag 
 volatile int interruptCounter = 0;
-volatile States state = IDLE;
 volatile Serial_States serial_state = SERIAL_IDLE;
+volatile int forbiden_direction = 2; /// 2 - No switch active |
 int interrupts_to_steps = 0;
 int cmd = 0;
 
@@ -57,18 +57,12 @@ void setup() {
   sei(); /// allow interrupts
 }
 
-void limitHalt(){
-  Serial.println("I should really stop here...");
-
-}
-
 void loop() {
-  received_data = serialFSM(&state, &serial_state, &f_byte, &s_byte, &t_byte);
+  received_data = serialFSM(&serial_state, &f_byte, &s_byte, &t_byte);
   if(received_data){
-    serialDecoder(&controls, f_byte, s_byte, t_byte);
+    serialDecoder(&controls, f_byte, s_byte, t_byte, &interruptCounter);
     received_data = false;
-  } 
-  //ctrlFSM(&state, &control_packet, &micro_stepping, &reset, &enable, &sleep);
+  }
 }
 
 
@@ -80,4 +74,8 @@ ISR(TIMER1_COMPA_vect){
   } 
     
 
+}
+
+void limitHalt(){
+  Serial.println("LIMIT SWITCH ACTIVE");
 }

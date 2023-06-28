@@ -15,16 +15,7 @@ const byte resetPin = 8; /// Reset pin for driver board. Logic low for reset.
 const byte enablePin = 10; /// Enable pin for driver board. Logic low for enable. 
 const byte sleepPin = 7; /// Sleep pin for driver board. Logic low for sleep.
 
-/// @brief Describes the possible states that the controller can be
-enum States {
-    IDLE,
-    SETUP,
-    STEP,
-    L_SWITCH,
-    C_ERROR,
-};
-
-
+/// @brief States for the FSM that handles the serial commands received. 
 enum Serial_States {
     SERIAL_IDLE, 
     FIRST_BYTE,
@@ -45,19 +36,22 @@ enum CMD {
     HALT_CMD = 0x03,
 };
 
+/// @brief A structure that groups all control parameters of the driver.
 struct ARDUINO_CONTROLS{
     CMD command;
     byte micro_stepping;
-    bool reset;
-    bool enable;
-    bool sleep;
-    bool direction;
-    bool halt;
-    int steps;
-    int interrupt_to_steps;
-    int freq_counter;
+    bool reset; /// Reset for the driver board is logic low.
+    bool enable; /// Enable logic low 
+    bool sleep; /// Sleep logic low. This disables holding torque.
+    bool direction; /// true -> Counterclockwise | false -> Clockwise
+    bool halt; /// Flag that halts motor operation
+    int steps; /// Number of steps to take
+    int interrupt_to_steps; /// Number of interrupts of the timer to achieve the desired steps | interrupt_to_steps = 2*steps -1 
+    int freq_counter; /// Counter for the desired frequency
 
-    // Base constructor 
+    /// @brief Constructor for the structure. Defaults the CMD to the INFO_CMD, that sends a packet with the current state of the driver.
+    /// micro_stepping to full step. Disables reset and sleep modes. Enables the controller board. Sets the direction to clockwise. 
+    /// halt to false. The number of steps and interrupts needed to zero and the frequency counter to zero. Sends the information to the pinout.
     ARDUINO_CONTROLS(){
         command = INFO_CMD;
         micro_stepping = 0x00;/// Full step by default
@@ -72,6 +66,7 @@ struct ARDUINO_CONTROLS{
         this->toCtrlPins();
     };
 
+    /// @brief Writes the current setup data of the structure to the pinout.
     void toCtrlPins(){
         byte ms2 = ((this->micro_stepping) >> 2);
         byte ms1 = ((this->micro_stepping) >> 2);
@@ -85,10 +80,13 @@ struct ARDUINO_CONTROLS{
         digitalWrite(sleepPin, this->sleep);
     }
 
+    /// @brief Writes the current step data to the pinout.
     void toStepPins(){
         digitalWrite(dirPin, this->direction);        
     }
 
+    /// @brief Packages the information on the structure to be sent via serial.
+    /// @return 16-bit array holding in the MSB the Setup data and in the LSB the step data.
     int packageControls(){
         byte to_send_a = 0x00;
         byte to_send_b = 0x00;

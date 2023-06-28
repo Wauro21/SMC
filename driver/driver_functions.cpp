@@ -78,7 +78,7 @@ void step(bool direction, int steps, int* n_interrupts){
 
 }
 
-void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte){
+void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte, volatile int* interrupt_counter){
     /// info variables
     byte setup_info = 0x00;
     byte step_info = 0x00;
@@ -129,6 +129,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             stopTimer1();
             ctrl->steps = 0;
             ctrl->interrupt_to_steps = 0;
+            *interrupt_counter = 0;
             break;
         }
         
@@ -140,16 +141,10 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
 }
 
 
-
-void ctrlFSM(volatile States* state, byte* control_packet, byte* m_s, bool* reset, bool* enable, bool* sleep){
-
-}
-
-
-bool serialFSM(volatile States* state, volatile Serial_States* serial_state, byte* f_byte, byte* s_byte, byte* t_byte){
+bool serialFSM(volatile Serial_States* serial_state, byte* f_byte, byte* s_byte, byte* t_byte){
     switch(*serial_state){
         case SERIAL_IDLE:{
-            if(Serial.available() && (*state == IDLE)) *serial_state = FIRST_BYTE;
+            if(Serial.available()) *serial_state = FIRST_BYTE;
             else *serial_state = SERIAL_IDLE;
             break;
         }

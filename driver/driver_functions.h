@@ -29,10 +29,22 @@ void stopTimer1();
 void step(bool direction, int steps, int* n_interrupts);
 
 
-void ctrlFSM(volatile States* state, byte* control_packet, byte* m_s, bool* reset, bool* enable, bool* sleep);
+/// @brief FSM that handles the recieved bytes from host. For each command, three bytes are saved.
+/// When 3 bytes are received the function return true.
+/// @param serial_state Corresponds to the variable that holds the current state of the FSM
+/// @param f_byte Variable to hold the first received byte.
+/// @param s_byte Variable to hold the second received byte.
+/// @param t_byte Variable to hold the third received byte.
+/// @return true if three bytes are correctly received.
+bool serialFSM(volatile Serial_States* serial_state, byte* f_byte, byte* s_byte, byte* t_byte);
 
-bool serialFSM(volatile States* state, volatile Serial_States* serial_state, byte* f_byte, byte* s_byte, byte* t_byte);
-
-void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte);
+/// @brief Decodes the three received bytes from the host onto the corresponding commands for the driver.
+/// The function manages all the changes 
+/// @param ctrl Control parameters of the driver
+/// @param f_byte Variable to hold the first received byte.
+/// @param s_byte Variable to hold the second received byte.
+/// @param t_byte Variable to hold the third received byte.
+/// @param interrupt_counter Counter that holds the timer1 a interrupt count
+void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte, volatile int* interrupt_counter);
 
 #endif
