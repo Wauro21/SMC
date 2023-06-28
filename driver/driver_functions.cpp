@@ -78,65 +78,120 @@ void step(bool direction, int steps, int* n_interrupts){
 
 }
 
-States cmdDecoder(byte serial_in){
+void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte){
+    /// info variables
+    byte setup_info = 0x00;
+    byte step_info = 0x00;
+    int packed_controls = 0;
 
-    byte cmd = serial_in >> 6;
 
-    switch(cmd){
-        case STEP_CMD: return STEP;
-        case SETUP_CMD: return SETUP;
-        default: return IDLE;
+    /// Unpack the CMD first 
+    ctrl->command = (CMD)(f_byte >> 6);
+
+    switch(ctrl->command){
+        case STEP_CMD:{
+            ctrl->direction = (bool)(f_byte & 0x01);
+            ctrl->steps = (int)((s_byte<<8) | (t_byte));
+            ctrl->interrupt_to_steps = 2*ctrl->steps -1 ;
+            /// Update values to pinout
+            ctrl->toStepPins();
+            startTimer1();
+            break;
+        }
+
+        case INFO_CMD:{
+            /// Respond with the current information for controls
+            packed_controls = ctrl->packageControls();
+            setup_info |= (packed_controls & 0xFF00) >>8;
+            step_info |= (packed_controls & 0x00FF);
+
+            /// Transmit via serial port
+            Serial.write(setup_info);
+            Serial.write(step_info);
+            break;
+
+        }
+        
+        case SETUP_CMD:{
+            ctrl->micro_stepping = (f_byte & 0x38) >> 3;
+            ctrl->reset = (f_byte & 0x04) >> 2;
+            ctrl->enable = (f_byte & 0x02) >> 1;
+            ctrl->sleep = (f_byte & 0x01);
+            ctrl->freq_counter = (int)((s_byte << 8) | (t_byte));
+            /// Update values to pinout
+            ctrl->toCtrlPins();
+            /// Update register
+            confTimer1(ctrl->freq_counter);
+            break;
+        }
+
+        case HALT_CMD: {
+            stopTimer1();
+            ctrl->steps = 0;
+            ctrl->interrupt_to_steps = 0;
+            break;
+        }
+        
+        default:{
+            // Not a valid CMD
+            Serial.write(0b11100000);
+        }
     }
-};
-
-void setupDecoder(byte serial_in, byte* m_s, bool* reset, bool* enable, bool* sleep){
-    *m_s = (serial_in & 0x38) >> 3;
-    *reset = (serial_in & 0x04) >> 2;
-    *enable = (serial_in & 0x02) >> 1;
-    *sleep = (serial_in & 0x01);
-
-    /// Unpack to bit-like value before assignement
-    byte ms2 = (*m_s >> 2);
-    byte ms1 = (*m_s >> 2);
-    byte ms0 = (*m_s & 0x01);
-
-    /// Apply to pinout
-    digitalWrite(ms2Pin, ms2); /// Pin 2 of microstepping controls
-    digitalWrite(ms1Pin, ms1); /// Pin 1 of microstepping controls
-    digitalWrite(ms0Pin, ms0); /// Pin 0 of microstepping controls
-    digitalWrite(resetPin, *reset); 
-    digitalWrite(enablePin, *enable);
-    digitalWrite(sleepPin, *sleep);
 }
 
 
 
 void ctrlFSM(volatile States* state, byte* control_packet, byte* m_s, bool* reset, bool* enable, bool* sleep){
 
-    switch(*state){
-        case IDLE:{            
-            if(Serial.available()){
-                *control_packet = Serial.read();
-                Serial.print("Readed cmd: ");
-                Serial.println(*control_packet, HEX);
-                *state = cmdDecoder(*control_packet);
-            }
-            else *state = IDLE;
+}
+
+
+bool serialFSM(volatile States* state, volatile Serial_States* serial_state, byte* f_byte, byte* s_byte, byte* t_byte){
+    switch(*serial_state){
+        case SERIAL_IDLE:{
+            if(Serial.available() && (*state == IDLE)) *serial_state = FIRST_BYTE;
+            else *serial_state = SERIAL_IDLE;
             break;
         }
 
-        case SETUP:{
-            Serial.println("SETUP-STATE");
-            setupDecoder(*control_packet, m_s, reset, enable, sleep);
-            *state = IDLE;
+        case FIRST_BYTE:{
+            // Save readed value
+            *f_byte = Serial.read();
+            *serial_state = WAIT_1;
             break;
         }
 
-        default:{
-            Serial.print("State was");
-            Serial.println(*state, HEX);
-            *state = IDLE;
+        case WAIT_1: {
+            if(Serial.available()) *serial_state = SECOND_BYTE;
+            else *serial_state = WAIT_1;
+            break;
         }
+
+        case SECOND_BYTE:{
+            *s_byte = Serial.read();
+            *serial_state = WAIT_2;
+            break;
+        }
+
+        case WAIT_2:{
+            if(Serial.available()) *serial_state = THIRD_BYTE;
+            else *serial_state = WAIT_2;
+            break;
+        }
+
+        case THIRD_BYTE:{
+            *t_byte = Serial.read();
+            *serial_state = DONE;
+        }
+
+        case DONE: {
+            *serial_state = SERIAL_IDLE;
+            return true;
+        }
+
+        default: *serial_state = SERIAL_IDLE;
     }
+
+    return false;
 
 }

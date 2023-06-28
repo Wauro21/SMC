@@ -31,4 +31,8 @@ void step(bool direction, int steps, int* n_interrupts);
 
 void ctrlFSM(volatile States* state, byte* control_packet, byte* m_s, bool* reset, bool* enable, bool* sleep);
 
+bool serialFSM(volatile States* state, volatile Serial_States* serial_state, byte* f_byte, byte* s_byte, byte* t_byte);
+
+void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte);
+
 #endif

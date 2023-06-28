@@ -1,23 +1,23 @@
 #include "constants.h"
 #include "driver_functions.h"
 
-// When two commands are sent they overwrite each other -> Add stack or something like that
 
 // Allow for halt flag 
-volatile bool halt = false;
 volatile int interruptCounter = 0;
 volatile States state = IDLE;
+volatile Serial_States serial_state = SERIAL_IDLE;
 int interrupts_to_steps = 0;
 int cmd = 0;
 
 // TEMP
 byte control_packet = 0x00;
+byte f_byte = 0x00;
+byte s_byte = 0x00;
+byte t_byte = 0x00;
+bool received_data = false;
 
 /// Operation controls
-byte micro_stepping = 0x00; /// Full step by default
-bool reset = false;
-bool enable = true; /// Controller is connected by default
-bool sleep = false; /// This allows for default holding torque
+ARDUINO_CONTROLS controls;
 
 
 void setup() {
@@ -63,18 +63,20 @@ void limitHalt(){
 }
 
 void loop() {
-
-  ctrlFSM(&state, &control_packet, &micro_stepping, &reset, &enable, &sleep);
+  received_data = serialFSM(&state, &serial_state, &f_byte, &s_byte, &t_byte);
+  if(received_data){
+    serialDecoder(&controls, f_byte, s_byte, t_byte);
+    received_data = false;
+  } 
+  //ctrlFSM(&state, &control_packet, &micro_stepping, &reset, &enable, &sleep);
 }
 
 
 ISR(TIMER1_COMPA_vect){
-
-  if(interruptCounter < interrupts_to_steps) interruptCounter+=1;
+  if(interruptCounter < controls.interrupt_to_steps) interruptCounter+=1;
   else{
     stopTimer1();
     interruptCounter = 0;
-    Serial.println("END");
   } 
     
 
