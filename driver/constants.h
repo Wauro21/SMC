@@ -43,11 +43,11 @@ struct ARDUINO_CONTROLS{
     bool reset; /// Reset for the driver board is logic low.
     bool enable; /// Enable logic low 
     bool sleep; /// Sleep logic low. This disables holding torque.
-    bool direction; /// true -> Counterclockwise | false -> Clockwise
+    bool direction; /// false -> Counterclockwise | true -> Clockwise
     bool halt; /// Flag that halts motor operation
-    int steps; /// Number of steps to take
-    int interrupt_to_steps; /// Number of interrupts of the timer to achieve the desired steps | interrupt_to_steps = 2*steps -1 
-    int freq_counter; /// Counter for the desired frequency
+    unsigned int steps; /// Number of steps to take
+    unsigned int interrupt_to_steps; /// Number of interrupts of the timer to achieve the desired steps | interrupt_to_steps = 2*steps -1 
+    unsigned int freq_counter; /// Counter for the desired frequency
 
     /// @brief Constructor for the structure. Defaults the CMD to the INFO_CMD, that sends a packet with the current state of the driver.
     /// micro_stepping to full step. Disables reset and sleep modes. Enables the controller board. Sets the direction to clockwise. 
@@ -57,7 +57,7 @@ struct ARDUINO_CONTROLS{
         micro_stepping = 0x00;/// Full step by default
         reset = false;
         enable = true; /// Controller is connected by default
-        sleep = false; /// This allows for default holding torque
+        sleep = true; /// This allows for default holding torque
         direction = false;
         halt = false;
         steps = 0;
@@ -87,7 +87,7 @@ struct ARDUINO_CONTROLS{
 
     /// @brief Packages the information on the structure to be sent via serial.
     /// @return 16-bit array holding in the MSB the Setup data and in the LSB the step data.
-    int packageControls(){
+    unsigned int packageControls(){
         byte to_send_a = 0x00;
         byte to_send_b = 0x00;
         to_send_a |= (0x02 << 6) | (this->micro_stepping << 3) | (this->reset << 2) | (this-> enable << 1) | (this->sleep);

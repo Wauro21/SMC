@@ -2,7 +2,7 @@
 #include "driver_functions.h"
 #include <Arduino.h>
 
-void confTimer1(int max_counter=15624){
+void confTimer1(unsigned int max_counter=15624){
 
     /// Setup register for timer A - All control register to zero
     TCCR1A = 0; 
@@ -58,32 +58,9 @@ void stopTimer1(){
 }
 
 
-void step(bool direction, int steps, int* n_interrupts){
-    
-    // Check if number of steps is valid
-    if(steps == 0){
-        Serial.println("Not a valid number of steps!"); /// Replace with actual coded message.
-        return;
-    }
-    
-    digitalWrite(dirPin, direction); /// Set step direction
-
-    *n_interrupts = 2*steps -1; /// Number of count reach interrupts before completion.
-
-    startTimer1();
-
-    /// Inform via serial what's being done
-    Serial.print("Stepping ");
-    Serial.println(steps, DEC);   
-
-}
-
-void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte, volatile int* interrupt_counter){
+void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte, volatile unsigned int* interrupt_counter){
     /// info variables
-    byte setup_info = 0x00;
-    byte step_info = 0x00;
-    int packed_controls = 0;
-
+    unsigned int packed_controls = 0;
 
     /// Unpack the CMD first 
     ctrl->command = (CMD)(f_byte >> 6);
@@ -95,19 +72,28 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             ctrl->interrupt_to_steps = 2*ctrl->steps -1 ;
             /// Update values to pinout
             ctrl->toStepPins();
+            
+            /// Check is controller is slept
+            if(!ctrl->sleep) digitalWrite(sleepPin, HIGH);
+
             startTimer1();
             break;
         }
 
         case INFO_CMD:{
+            byte to_send[6]; 
             /// Respond with the current information for controls
             packed_controls = ctrl->packageControls();
-            setup_info |= (packed_controls & 0xFF00) >>8;
-            step_info |= (packed_controls & 0x00FF);
+            /// Setup info
+            to_send[0] =  (packed_controls & 0xFF00) >>8;
+            to_send[1] =  (ctrl->freq_counter) >> 8;
+            to_send[2] = (ctrl->freq_counter) & 0x00FF;
 
-            /// Transmit via serial port
-            Serial.write(setup_info);
-            Serial.write(step_info);
+            /// Step info
+            to_send[3] = (packed_controls & 0x00FF);
+            to_send[4] = (ctrl->steps) >> 8;
+            to_send[5] = (ctrl->steps) & 0x00FF;
+            Serial.write(to_send, 6);
             break;
 
         }
@@ -117,7 +103,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             ctrl->reset = (f_byte & 0x04) >> 2;
             ctrl->enable = (f_byte & 0x02) >> 1;
             ctrl->sleep = (f_byte & 0x01);
-            ctrl->freq_counter = (int)((s_byte << 8) | (t_byte));
+            ctrl->freq_counter = (unsigned int)((s_byte << 8) | (t_byte));
             /// Update values to pinout
             ctrl->toCtrlPins();
             /// Update register
@@ -177,6 +163,9 @@ bool serialFSM(volatile Serial_States* serial_state, byte* f_byte, byte* s_byte,
         case THIRD_BYTE:{
             *t_byte = Serial.read();
             *serial_state = DONE;
+            Serial.println(*f_byte);
+            Serial.println(*s_byte);
+            Serial.println(*t_byte);
         }
 
         case DONE: {

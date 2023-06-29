@@ -3,11 +3,9 @@
 
 
 // Allow for halt flag 
-volatile int interruptCounter = 0;
+volatile unsigned int interruptCounter = 0;
 volatile Serial_States serial_state = SERIAL_IDLE;
 volatile int forbiden_direction = 2; /// 2 - No switch active |
-int interrupts_to_steps = 0;
-int cmd = 0;
 
 // TEMP
 byte control_packet = 0x00;
@@ -71,6 +69,7 @@ ISR(TIMER1_COMPA_vect){
   else{
     stopTimer1();
     interruptCounter = 0;
+    if(!controls.sleep) digitalWrite(sleepPin, LOW); /// If enabled, send controller to sleep
   } 
     
 

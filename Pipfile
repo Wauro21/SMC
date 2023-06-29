@@ -7,8 +7,8 @@ name = "pypi"
 numpy = "*"
 matplotlib = "*"
 pyserial = "*"
-bitarray = "*"
 pyside2 = "*"
+bitarray = "*"
 
 [dev-packages]
 ipykernel = "*"
