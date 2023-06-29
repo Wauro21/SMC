@@ -67,6 +67,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
 
     switch(ctrl->command){
         case STEP_CMD:{
+            byte to_send[3];
             ctrl->direction = (bool)(f_byte & 0x01);
             ctrl->steps = (int)((s_byte<<8) | (t_byte));
             ctrl->interrupt_to_steps = 2*ctrl->steps -1 ;
@@ -75,8 +76,14 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             
             /// Check is controller is slept
             if(!ctrl->sleep) digitalWrite(sleepPin, HIGH);
-
             startTimer1();
+
+            packed_controls = ctrl->packageControls();
+            to_send[0] = (packed_controls & 0x00FF);
+            to_send[1] = (ctrl->steps) >> 8;
+            to_send[2] = (ctrl->steps) & 0x00FF;
+
+            Serial.write(to_send, 3);
             break;
         }
 
@@ -99,6 +106,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
         }
         
         case SETUP_CMD:{
+            byte to_send[3];
             ctrl->micro_stepping = (f_byte & 0x38) >> 3;
             ctrl->reset = (f_byte & 0x04) >> 2;
             ctrl->enable = (f_byte & 0x02) >> 1;
@@ -108,6 +116,15 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             ctrl->toCtrlPins();
             /// Update register
             confTimer1(ctrl->freq_counter);
+
+            packed_controls = ctrl->packageControls();
+            to_send[0] = (packed_controls & 0xFF00) >> 8;
+            to_send[1] = (ctrl->freq_counter) >> 8;
+            to_send[2] = (ctrl->freq_counter) & 0x00FF;
+
+            Serial.write(to_send, 3);
+            
+
             break;
         }
 
@@ -163,9 +180,6 @@ bool serialFSM(volatile Serial_States* serial_state, byte* f_byte, byte* s_byte,
         case THIRD_BYTE:{
             *t_byte = Serial.read();
             *serial_state = DONE;
-            Serial.println(*f_byte);
-            Serial.println(*s_byte);
-            Serial.println(*t_byte);
         }
 
         case DONE: {

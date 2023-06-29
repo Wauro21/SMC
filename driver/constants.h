@@ -55,8 +55,8 @@ struct ARDUINO_CONTROLS{
     ARDUINO_CONTROLS(){
         command = INFO_CMD;
         micro_stepping = 0x00;/// Full step by default
-        reset = false;
-        enable = true; /// Controller is connected by default
+        reset = true;
+        enable = false; /// Controller is connected by default
         sleep = true; /// This allows for default holding torque
         direction = false;
         halt = false;

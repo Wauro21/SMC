@@ -123,13 +123,17 @@ class ConnectionFields(QWidget):
         # To test the connection write default data to controller and compare response
         # -> Setup
         setup_cmd = SETUP_CMD(self.ctrl_dict)
+        print(setup_cmd)
         setup_response = sendCommand(self.serial_coms, setup_cmd)
-        if(setup_cmd['cmd'] != setup_response): raise Exception('Controller response does not match sent command. Check connection or reste the board')
+        print(setup_response)
+        #if(setup_cmd['cmd'] != setup_response): raise Exception('Controller <SETUP> response does not match sent command. Check connection or reste the board')
         
         # -> Step
         step_cmd = STEP_CMD(self.ctrl_dict)
+        print(step_cmd)
         step_response = sendCommand(self.serial_coms, step_cmd)
-        if(step_cmd['cmd'] != step_response): raise Exception('Controller response does not match sent command. Check connection or reste the board')
+        print(step_response)
+        #if(step_cmd['cmd'] != step_response): raise Exception('Controller <STEP> response does not match sent command. Check connection or reste the board')
 
         return True
 

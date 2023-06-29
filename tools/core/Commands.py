@@ -15,8 +15,8 @@ class MicroStepping(Enum):
 
 # Defaults for controller
 MICRO_STEPPING_DEFAULT = MicroStepping.FULL_STEP # Full step
-RESET_DEFAULT = False # not-reseted
-ENABLE_DEFAULT = True # Enabled
+RESET_DEFAULT = True # not-reseted
+ENABLE_DEFAULT = False # Enabled
 SLEEP_DEFAULT = True # Disable sleep
 
 # Commands defined by the controller
@@ -121,17 +121,12 @@ def sendCommand(coms, cmd):
 
     # Wait for automatic reply
     response = coms.read(cmd[k_r_size])
-    # Convert the response to bitarrays
-    int_response = int(response)
-    bin_response = convert2Binary(int_response, cmd[k_r_size]*8)
-    
+    # Convert the response to bitarrays    
     n_response = []
-    pivot = 0
-    for i in range(cmd[k_r_size]):
-        n_response.append(bin_response[pivot:pivot+8])
-        pivot += 8
 
-    n_response.reverse()
+    for i in response:
+        n_response.append(convert2Binary(i, 8))
+
     return n_response
 
 def convert2Binary(number, size):
