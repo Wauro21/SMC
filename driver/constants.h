@@ -68,8 +68,8 @@ struct ARDUINO_CONTROLS{
 
     /// @brief Writes the current setup data of the structure to the pinout.
     void toCtrlPins(){
-        byte ms2 = ((this->micro_stepping) >> 2);
-        byte ms1 = ((this->micro_stepping) >> 2);
+        byte ms2 = ((this->micro_stepping) >> 2) & 0x01;
+        byte ms1 = ((this->micro_stepping) >> 1) & 0x01;
         byte ms0 = ((this->micro_stepping) & 0x01);
         /// Apply to pinout
         digitalWrite(ms2Pin, ms2); /// Pin 2 of microstepping controls

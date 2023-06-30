@@ -80,7 +80,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
 
             packed_controls = ctrl->packageControls();
             to_send[0] = (packed_controls & 0x00FF);
-            to_send[1] = (ctrl->steps) >> 8;
+            to_send[1] = (ctrl->steps & 0xFF00) >> 8;
             to_send[2] = (ctrl->steps) & 0x00FF;
 
             Serial.write(to_send, 3);
@@ -93,12 +93,12 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             packed_controls = ctrl->packageControls();
             /// Setup info
             to_send[0] =  (packed_controls & 0xFF00) >>8;
-            to_send[1] =  (ctrl->freq_counter) >> 8;
+            to_send[1] =  (ctrl->freq_counter & 0xFF000) >> 8;
             to_send[2] = (ctrl->freq_counter) & 0x00FF;
 
             /// Step info
             to_send[3] = (packed_controls & 0x00FF);
-            to_send[4] = (ctrl->steps) >> 8;
+            to_send[4] = (ctrl->steps & 0xFF00) >> 8;
             to_send[5] = (ctrl->steps) & 0x00FF;
             Serial.write(to_send, 6);
             break;
@@ -119,7 +119,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
 
             packed_controls = ctrl->packageControls();
             to_send[0] = (packed_controls & 0xFF00) >> 8;
-            to_send[1] = (ctrl->freq_counter) >> 8;
+            to_send[1] = (ctrl->freq_counter & 0xFF00) >> 8;
             to_send[2] = (ctrl->freq_counter) & 0x00FF;
 
             Serial.write(to_send, 3);
@@ -133,6 +133,9 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
             ctrl->steps = 0;
             ctrl->interrupt_to_steps = 0;
             *interrupt_counter = 0;
+            // 1 byte response
+            byte to_send = 0xC0;
+            Serial.write(to_send);
             break;
         }
         

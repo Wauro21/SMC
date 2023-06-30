@@ -24,7 +24,6 @@ class ConnectionFields(QWidget):
         super().__init__(parent)
 
         # Objects
-        self.serial_coms = None
         self.ctrl_dict = ctrl_dict
 
 
@@ -83,16 +82,16 @@ class ConnectionFields(QWidget):
             return
         
         try:
-            if(self.serial_coms):
-                self.serial_coms.close()
-                self.serial_coms = None
+            if(self.ctrl_dict['comms']):
+                self.ctrl_dict['comms'].close()
+                self.ctrl_dict['comms'] = None
                 self.disconnect_signal.emit()
                 connect_btn_txt = 'Connect'
                 status_label_txt = 'Not Connected'
                 port_list_refresh_enable = True
 
             else:
-                self.serial_coms = serial.Serial(port, 9600, timeout=SERIAL_TIMEOUT)
+                self.ctrl_dict['comms'] = serial.Serial(port, 9600, timeout=SERIAL_TIMEOUT)
                 # Wait a second for arduino to reboot after setting up the connection
                 time.sleep(5)
                 self.ConnectionTest()
@@ -107,8 +106,8 @@ class ConnectionFields(QWidget):
             self.lock(port_list_refresh_enable)
 
         except Exception as e:
-            self.serial_coms.close()
-            self.serial_coms = None
+            self.ctrl_dict['comms'].close()
+            self.ctrl_dict['comms'] = None
             self.lock(True)
             show_error = ErrorBox(e, self)
             show_error.exec_()
@@ -124,16 +123,16 @@ class ConnectionFields(QWidget):
         # -> Setup
         setup_cmd = SETUP_CMD(self.ctrl_dict)
         print(setup_cmd)
-        setup_response = sendCommand(self.serial_coms, setup_cmd)
+        setup_response = sendCommand(self.ctrl_dict['comms'], setup_cmd)
         print(setup_response)
-        #if(setup_cmd['cmd'] != setup_response): raise Exception('Controller <SETUP> response does not match sent command. Check connection or reste the board')
+        if(setup_cmd['cmd'] != setup_response): raise Exception('Controller <SETUP> response does not match sent command. Check connection or reste the board')
         
         # -> Step
         step_cmd = STEP_CMD(self.ctrl_dict)
         print(step_cmd)
-        step_response = sendCommand(self.serial_coms, step_cmd)
+        step_response = sendCommand(self.ctrl_dict['comms'], step_cmd)
         print(step_response)
-        #if(step_cmd['cmd'] != step_response): raise Exception('Controller <STEP> response does not match sent command. Check connection or reste the board')
+        if(step_cmd['cmd'] != step_response): raise Exception('Controller <STEP> response does not match sent command. Check connection or reste the board')
 
         return True
 
