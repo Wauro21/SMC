@@ -1,18 +1,16 @@
 #include "constants.h"
 #include "driver_functions.h"
 
+/// Serial reception variables
+byte f_byte = 0x00; /// First byte
+byte s_byte = 0x00; /// Second byte
+byte t_byte = 0x00; /// Third byte
+bool received_data = false; /// Successful reception flag
 
-// Allow for halt flag 
-volatile unsigned int interruptCounter = 0;
-volatile Serial_States serial_state = SERIAL_IDLE;
+/// Step operation variables
+volatile unsigned int interruptCounter = 0; /// Number of times the timer interrupt has been rised
+volatile Serial_States serial_state = SERIAL_IDLE; /// Current state of Serial FSM
 volatile int forbiden_direction = 2; /// 2 - No switch active |
-
-// TEMP
-byte control_packet = 0x00;
-byte f_byte = 0x00;
-byte s_byte = 0x00;
-byte t_byte = 0x00;
-bool received_data = false;
 
 /// Operation controls
 ARDUINO_CONTROLS controls;
@@ -76,5 +74,5 @@ ISR(TIMER1_COMPA_vect){
 }
 
 void limitHalt(){
-  Serial.println("LIMIT SWITCH ACTIVE");
+  Serial.println("LIMIT SWITCH ACTIVE"); /// [Temporal]
 }
