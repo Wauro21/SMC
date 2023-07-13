@@ -29,7 +29,12 @@ class CentralWidget(QWidget):
         self.comsWidget = ConnectionFields(self.driver_controls, self)
         self.controlsWidget = ControlFields(self.driver_controls, self)
 
+        # init routines
+        self.controlsWidget.setEnabled(False)
+
         # Signals and Slots
+        self.comsWidget.connect_signal.connect(self.unlockControls)
+        self.comsWidget.disconnect_signal.connect(self.lockControls)
 
         # Layout
         layout = QVBoxLayout()
@@ -44,6 +49,12 @@ class CentralWidget(QWidget):
         layout.addLayout(central_row)
 
         self.setLayout(layout)
+
+    def lockControls(self):
+        self.controlsWidget.setEnabled(False)
+
+    def unlockControls(self):
+        self.controlsWidget.setEnabled(True)
 
 
 if __name__ == '__main__':
