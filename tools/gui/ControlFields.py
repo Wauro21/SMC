@@ -3,7 +3,7 @@ from PySide2.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QApplicat
 from core.Commands import HALT_CMD, SETUP_CMD, MicroStepping, MIN_SPEED_RPM, MAX_SPEED_RPM, MIN_STEPS, MAX_STEPS, STEP_CMD, getFrequency, sendCommand
 from gui.Constants import SPEED_SUFFIX
 from PySide2.QtCore import Qt, Signal
-import copy
+
 
 __version__ ='0.1'
 __author__ = 'maurio.aravena@sansano.usm.cl'
@@ -41,6 +41,34 @@ class ControlFields(QWidget):
         self.initSteps()
         self.initSpeed()
         self.populateMS()
+        self.handleDirectionButtons()
+        self.halt_btn.setStyleSheet(
+            '''
+            background-color: #DF2935;
+            font-weight: bold;
+            '''
+        )
+
+        self.send_btn.setStyleSheet(
+            '''
+            background-color: #2E933C;
+            font-weight: bold;
+            '''
+        )
+
+        self.single_up_step_btn.setStyleSheet(
+            '''
+            background-color: #8EA8C3;
+            font-weight: bold;
+            '''
+        )
+        
+        self.single_down_step_btn.setStyleSheet(
+            '''
+            background-color: #8EA8C3;
+            font-weight: bold;
+            '''
+        )
 
         #Slots and signals
         self.speed_field.valueChanged.connect(self.assignSpeed)
@@ -62,18 +90,20 @@ class ControlFields(QWidget):
         left_layout.addRow('Factor:', self.factor_field)
         left_layout.addRow('Micro Stepping:', self.micro_stepping)
         left_layout.addRow('Steps:', self.steps_field)
-        left_layout.addRow(self.send_btn)
 
         # -> Center column
         center_layout = QVBoxLayout()
         center_layout.addWidget(self.up_btn)
         center_layout.addWidget(self.down_btn)
+        center_layout.addStretch(1)
+        center_layout.addWidget(self.send_btn)
 
         # -> Right Column
         right_layout = QVBoxLayout()
         right_layout.addWidget(self.single_up_step_btn)
-        right_layout.addWidget(self.halt_btn)
         right_layout.addWidget(self.single_down_step_btn)
+        right_layout.addStretch(1)
+        right_layout.addWidget(self.halt_btn)
 
         layout.addLayout(left_layout)
         layout.addLayout(center_layout)
@@ -131,10 +161,12 @@ class ControlFields(QWidget):
     def setDirUp(self):
         # Clockwise for up
         self.ctrl['direction'] = True
+        self.handleDirectionButtons()
 
     def setDirDown(self):
         # CounterClockWise for Down
         self.ctrl['direction'] = False
+        self.handleDirectionButtons()
 
     def haltAction(self):
         comms = self.ctrl['comms']
@@ -200,6 +232,35 @@ class ControlFields(QWidget):
         except Exception as e: 
             print(e)
 
+    def handleDirectionButtons(self):
+        if(self.ctrl['direction']):
+            self.up_btn.setStyleSheet(
+                '''
+                background-color: #F55D3E;
+                font-weight: bold;
+                '''
+            )
+            
+            self.down_btn.setStyleSheet(
+                '''
+                background-color: #FFE66D;
+                font-weight: bold;
+                '''
+            )
+        else:
+            self.up_btn.setStyleSheet(
+                '''
+                background-color: #FFE66D;
+                font-weight: bold;
+                '''
+            )
+
+            self.down_btn.setStyleSheet(
+                '''
+                background-color: #F55D3E;
+                font-weight: bold;
+                '''
+            )
 
 if __name__ == '__main__':
     app = QApplication([])
