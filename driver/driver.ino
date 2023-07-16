@@ -10,7 +10,7 @@ bool received_data = false; /// Successful reception flag
 /// Step operation variables
 volatile unsigned int interruptCounter = 0; /// Number of times the timer interrupt has been rised
 volatile Serial_States serial_state = SERIAL_IDLE; /// Current state of Serial FSM
-volatile int forbiden_direction = 2; /// 2 - No switch active |
+volatile bool limit_halt = false;
 
 /// Operation controls
 ARDUINO_CONTROLS controls;
@@ -32,6 +32,8 @@ void setup() {
   pinMode(resetPin, OUTPUT); /// reset pin for driver board
   pinMode(enablePin, OUTPUT); /// enable pin for driver board
   pinMode(sleepPin, OUTPUT); /// sleep pin for driver board
+  pinMode(VCC_PIN_A, OUTPUT);
+  pinMode(VCC_PIN_B, OUTPUT);
 
 
   /// Default values for I/O
@@ -43,17 +45,26 @@ void setup() {
   digitalWrite(resetPin, HIGH);
   digitalWrite(enablePin, LOW);
   digitalWrite(sleepPin, HIGH);
+  digitalWrite(VCC_PIN_A, HIGH);
+  digitalWrite(VCC_PIN_B, HIGH);
 
 
   /// Attach intterupt to switch pins
-  attachInterrupt(digitalPinToInterrupt(highSwitch), limitHalt, LOW);
-  attachInterrupt(digitalPinToInterrupt(lowSwitch), limitHalt, LOW);
+  attachInterrupt(digitalPinToInterrupt(highSwitch), limitHalt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(lowSwitch), limitHalt, CHANGE);
 
   confTimer1(); /// Setup timer configuration
   sei(); /// allow interrupts
 }
 
 void loop() {
+  if(limit_halt){
+    stopTimer1();
+    interruptCounter = 0;
+    limit_halt = false;
+    if(!controls.sleep) digitalWrite(sleepPin, HIGH);
+  }
+
   received_data = serialFSM(&serial_state, &f_byte, &s_byte, &t_byte);
   if(received_data){
     serialDecoder(&controls, f_byte, s_byte, t_byte, &interruptCounter);
@@ -74,5 +85,5 @@ ISR(TIMER1_COMPA_vect){
 }
 
 void limitHalt(){
-  Serial.println("LIMIT SWITCH ACTIVE"); /// [Temporal]
+  limit_halt = true;
 }

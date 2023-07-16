@@ -54,7 +54,8 @@ void startTimer1(int prescaler=64){
 
 void stopTimer1(){
     TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10)); /// Disconnects the clock source.
-    TCNT1 = 0; /// Clean the counter. 
+    TCNT1 = 0; /// Clean the counter.
+    digitalWrite(outPin, LOW); /// Reset output pin to default low
 }
 
 
@@ -130,6 +131,7 @@ void serialDecoder(ARDUINO_CONTROLS* ctrl, byte f_byte, byte s_byte, byte t_byte
 
         case HALT_CMD: {
             stopTimer1();
+            if(!ctrl->sleep) digitalWrite(sleepPin, LOW);
             ctrl->steps = 0;
             ctrl->interrupt_to_steps = 0;
             *interrupt_counter = 0;

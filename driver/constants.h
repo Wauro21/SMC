@@ -14,6 +14,8 @@ const byte ms0Pin = 13; /// Microstepping mode pin 0
 const byte resetPin = 8; /// Reset pin for driver board. Logic low for reset.
 const byte enablePin = 10; /// Enable pin for driver board. Logic low for enable. 
 const byte sleepPin = 7; /// Sleep pin for driver board. Logic low for sleep.
+const byte VCC_PIN_A = 4; /// Pin used to run vcc rail for limit switch
+const byte VCC_PIN_B = 5; /// Pin used to run vcc rail for limit switch
 
 /// @brief States for the FSM that handles the serial commands received. 
 enum Serial_States {
