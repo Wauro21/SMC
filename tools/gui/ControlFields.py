@@ -12,6 +12,8 @@ __author__ = 'maurio.aravena@sansano.usm.cl'
 class ControlFields(QWidget):
 
     # Signals
+    controller_says = Signal(list)
+    host_asks = Signal(dict)
 
     def __init__(self,ctrl_dict, parent=None):
         super().__init__(parent)
@@ -23,7 +25,6 @@ class ControlFields(QWidget):
         #Widgets
         # -> Left column
         self.speed_field = QSpinBox(self)
-        self.factor_field = QLineEdit(self)
         self.micro_stepping = QComboBox(self)
         self.steps_field = QSpinBox(self)
         self.send_btn = QPushButton('SEND')
@@ -37,11 +38,18 @@ class ControlFields(QWidget):
         self.single_down_step_btn = QPushButton('Single DOWN')
         self.halt_btn = QPushButton('HALT')
 
+        self.holding_torque = QPushButton('Holding Torque')
+
         #Init routines
         self.initSteps()
         self.initSpeed()
         self.populateMS()
         self.handleDirectionButtons()
+        self.holding_torque.setStyleSheet(
+            '''
+            background-color: #F3A712
+            '''
+        )
         self.halt_btn.setStyleSheet(
             '''
             background-color: #DF2935;
@@ -80,6 +88,7 @@ class ControlFields(QWidget):
         self.down_btn.clicked.connect(self.setDirDown)
         self.single_up_step_btn.clicked.connect(self.singleStepUp)
         self.single_down_step_btn.clicked.connect(self.singleStepDown)
+        self.holding_torque.clicked.connect(self.torqueHandler)
 
         #Layout
         layout = QHBoxLayout()
@@ -87,9 +96,9 @@ class ControlFields(QWidget):
         # -> Left column
         left_layout = QFormLayout()
         left_layout.addRow('Speed:',  self.speed_field)
-        left_layout.addRow('Factor:', self.factor_field)
         left_layout.addRow('Micro Stepping:', self.micro_stepping)
         left_layout.addRow('Steps:', self.steps_field)
+        left_layout.addRow(self.holding_torque)
 
         # -> Center column
         center_layout = QVBoxLayout()
@@ -111,6 +120,31 @@ class ControlFields(QWidget):
 
         self.setLayout(layout)
 
+    def torqueHandler(self):
+        status = not self.ctrl['sleep']
+
+        if not(status): 
+            self.holding_torque.setStyleSheet('')
+
+        else:
+            self.holding_torque.setStyleSheet(
+                '''
+                background-color: #F3A712; 
+                '''
+            )
+
+        self.ctrl['sleep'] = status
+
+        #Coms
+        comms = self.ctrl['comms']
+
+        # Send the CMD
+        cmd = SETUP_CMD(self.ctrl)
+        self.host_asks.emit(cmd)
+        response = sendCommand(comms, cmd)
+        self.controller_says.emit(response)
+
+
     def singleStepUp(self):
         #Coms
         comms = self.ctrl['comms']
@@ -125,9 +159,11 @@ class ControlFields(QWidget):
 
         # CMD 
         cmd = STEP_CMD(self.ctrl)
+        self.host_asks.emit(cmd)
 
         # Send CMD 
         response = sendCommand(comms, cmd)
+        self.controller_says.emit(response)
 
         # Restore values
         self.ctrl['direction'] = direction
@@ -147,9 +183,11 @@ class ControlFields(QWidget):
 
         # CMD 
         cmd = STEP_CMD(self.ctrl)
+        self.host_asks.emit(cmd)
 
         # Send CMD 
         response = sendCommand(comms, cmd)
+        self.controller_says.emit(response)
 
         # Restore values
         self.ctrl['direction'] = direction
@@ -171,7 +209,6 @@ class ControlFields(QWidget):
     def haltAction(self):
         comms = self.ctrl['comms']
         response = sendCommand(comms, HALT_CMD)
-        print('Halt response {}'.format(response))
 
     def initSteps(self):
         self.steps_field.setRange(MIN_STEPS, MAX_STEPS)
@@ -218,16 +255,18 @@ class ControlFields(QWidget):
 
                 # Inform arduino
                 setup_cmd = SETUP_CMD(self.ctrl)
+                self.host_asks.emit(setup_cmd)
                 setup_response = sendCommand(comms, setup_cmd)
-                print('Setup response is {}'.format(setup_response))
+                self.controller_says.emit(setup_response)
 
                 self.freq_flag = False
 
             # Build step CMD 
             step_cmd = STEP_CMD(self.ctrl)
+            self.host_asks.emit(step_cmd)
             # send the command and get response from controller
             step_response = sendCommand(comms, step_cmd)
-            print('Step response is {}'.format(step_response))
+            self.controller_says.emit(step_response)
 
         except Exception as e: 
             print(e)
@@ -236,28 +275,28 @@ class ControlFields(QWidget):
         if(self.ctrl['direction']):
             self.up_btn.setStyleSheet(
                 '''
-                background-color: #F55D3E;
+                background-color: #8EA8C3;
                 font-weight: bold;
                 '''
             )
             
             self.down_btn.setStyleSheet(
                 '''
-                background-color: #FFE66D;
+                background-color:;
                 font-weight: bold;
                 '''
             )
         else:
             self.up_btn.setStyleSheet(
                 '''
-                background-color: #FFE66D;
+                background-color:;
                 font-weight: bold;
                 '''
             )
 
             self.down_btn.setStyleSheet(
                 '''
-                background-color: #F55D3E;
+                background-color: #8EA8C3;
                 font-weight: bold;
                 '''
             )

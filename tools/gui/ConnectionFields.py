@@ -11,7 +11,6 @@ __version__ ='0.1'
 __author__ = 'maurio.aravena@sansano.usm.cl'
 
 # Default values
-CONNECTION_STATUS_LABEL = 'Connection status {}'
 SERIAL_TIMEOUT = 10.0
 
 
@@ -31,11 +30,9 @@ class ConnectionFields(QWidget):
         self.serial_ports = QComboBox()
         self.refresh_btn = QPushButton('Refresh')
         self.connect_btn = QPushButton('Connect')
-        self.status_label = QLabel(CONNECTION_STATUS_LABEL.format('Not Connected'))
 
 
         #init routines
-        self.status_label.setAlignment(Qt.AlignCenter)
         self.SerialList()
 
 
@@ -48,7 +45,6 @@ class ConnectionFields(QWidget):
         layout.addWidget(self.serial_ports)
         layout.addWidget(self.refresh_btn)
         layout.addWidget(self.connect_btn)
-        layout.addWidget(self.status_label)
 
         self.setLayout(layout)
 
@@ -87,8 +83,8 @@ class ConnectionFields(QWidget):
                 self.ctrl_dict['comms'] = None
                 self.disconnect_signal.emit()
                 connect_btn_txt = 'Connect'
-                status_label_txt = 'Not Connected'
                 port_list_refresh_enable = True
+                self.connect_btn.setStyleSheet('')
 
             else:
                 self.ctrl_dict['comms'] = serial.Serial(port, 9600, timeout=SERIAL_TIMEOUT)
@@ -96,13 +92,17 @@ class ConnectionFields(QWidget):
                 time.sleep(5)
                 self.ConnectionTest()
                 self.connect_signal.emit()
+                # Change color to indicate that connection was setup
+                self.connect_btn.setStyleSheet(
+                    '''
+                    background-color: #2E933C;
+                    '''
+                )
                 connect_btn_txt = 'Disconnect'
-                status_label_txt = 'Connected'
                 port_list_refresh_enable = False
 
             # Update values of widget
             self.connect_btn.setText(connect_btn_txt)
-            self.status_label.setText(status_label_txt)
             self.lock(port_list_refresh_enable)
 
         except Exception as e:
@@ -122,16 +122,12 @@ class ConnectionFields(QWidget):
         # To test the connection write default data to controller and compare response
         # -> Setup
         setup_cmd = SETUP_CMD(self.ctrl_dict)
-        print(setup_cmd)
         setup_response = sendCommand(self.ctrl_dict['comms'], setup_cmd)
-        print(setup_response)
         if(setup_cmd['cmd'] != setup_response): raise Exception('Controller <SETUP> response does not match sent command. Check connection or reste the board')
         
         # -> Step
         step_cmd = STEP_CMD(self.ctrl_dict)
-        print(step_cmd)
         step_response = sendCommand(self.ctrl_dict['comms'], step_cmd)
-        print(step_response)
         if(step_cmd['cmd'] != step_response): raise Exception('Controller <STEP> response does not match sent command. Check connection or reste the board')
 
         return True

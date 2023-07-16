@@ -4,6 +4,7 @@ from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
 from gui.ConnectionFields import ConnectionFields
 from gui.ControlFields import ControlFields
 from core.Commands import MICRO_STEPPING_DEFAULT, RESET_DEFAULT, ENABLE_DEFAULT, SLEEP_DEFAULT, MIN_SPEED_RPM, MIN_STEPS
+from gui.CommandHistory import CommandHistory
 
 class CentralWidget(QWidget):
     def __init__(self, parent=None):
@@ -28,6 +29,7 @@ class CentralWidget(QWidget):
         #Widgets
         self.comsWidget = ConnectionFields(self.driver_controls, self)
         self.controlsWidget = ControlFields(self.driver_controls, self)
+        self.historyWidget = CommandHistory(self)
 
         # init routines
         self.controlsWidget.setEnabled(False)
@@ -35,6 +37,8 @@ class CentralWidget(QWidget):
         # Signals and Slots
         self.comsWidget.connect_signal.connect(self.unlockControls)
         self.comsWidget.disconnect_signal.connect(self.lockControls)
+        self.controlsWidget.controller_says.connect(self.historyWidget.receivedCMD)
+        self.controlsWidget.host_asks.connect(self.historyWidget.sentCMD)
 
         # Layout
         layout = QVBoxLayout()
@@ -47,6 +51,7 @@ class CentralWidget(QWidget):
         central_row.addWidget(self.controlsWidget)
 
         layout.addLayout(central_row)
+        layout.addWidget(self.historyWidget)
 
         self.setLayout(layout)
 
