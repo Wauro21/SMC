@@ -17,7 +17,7 @@ class SMC(QMainWindow):
         # init routines
         self.setWindowTitle('Stepper Motor Controller')
         self.setCentralWidget(self.SMC_Widget)
-        self.setWindowIcon(QtGui.QIcon('../rsrcs/icon.png'))
+        self.setWindowIcon(QtGui.QIcon('rsrcs/icon.png'))
 
         # signals and slots
 

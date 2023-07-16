@@ -33,7 +33,7 @@ class CommandHistory(QWidget):
         
         formated_string = '[{}]: {}'.format(time_stamp, temp)
         item = QListWidgetItem(formated_string)
-        icon = QIcon('../rsrcs/sent_arrow.png')
+        icon = QIcon('rsrcs/sent_arrow.png')
         item.setIcon(icon)
 
         self.history_list.addItem(item)
@@ -50,7 +50,7 @@ class CommandHistory(QWidget):
         
         formated_string = '[{}]: {}'.format(time_stamp, temp)
         item = QListWidgetItem(formated_string)
-        icon = QIcon('../rsrcs/received_arrow.png')
+        icon = QIcon('rsrcs/received_arrow.png')
         item.setIcon(icon)
 
         self.history_list.addItem(item)
