@@ -1,6 +1,6 @@
 import sys
 from PySide2.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QApplication, QFormLayout, QVBoxLayout, QLineEdit, QHBoxLayout, QSpinBox
-from core.Commands import HALT_CMD, SETUP_CMD, MicroStepping, MIN_SPEED_RPM, MAX_SPEED_RPM, MIN_STEPS, MAX_STEPS, STEP_CMD, getFrequency, sendCommand
+from smc_core.Commands import HALT_CMD, SETUP_CMD, MicroStepping, MIN_SPEED_RPM, MAX_SPEED_RPM, MIN_STEPS, MAX_STEPS, STEP_CMD, getFrequency, sendCommand
 from gui.Constants import SPEED_SUFFIX
 from PySide2.QtCore import Qt, Signal
 

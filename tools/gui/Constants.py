@@ -1,2 +1,1 @@
-
 SPEED_SUFFIX = '  RPM'

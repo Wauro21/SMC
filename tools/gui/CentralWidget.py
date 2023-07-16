@@ -3,7 +3,7 @@ import os
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
 from gui.ConnectionFields import ConnectionFields
 from gui.ControlFields import ControlFields
-from core.Commands import MICRO_STEPPING_DEFAULT, RESET_DEFAULT, ENABLE_DEFAULT, SLEEP_DEFAULT, MIN_SPEED_RPM, MIN_STEPS
+from smc_core.Commands import MICRO_STEPPING_DEFAULT, RESET_DEFAULT, ENABLE_DEFAULT, SLEEP_DEFAULT, MIN_SPEED_RPM, MIN_STEPS
 from gui.CommandHistory import CommandHistory
 
 class CentralWidget(QWidget):
