@@ -1,6 +1,9 @@
 # Stepper-Motor-Controller
 
-![smc_logo](tools/rsrcs/icon.png)
+<p align="center">
+  <img height=250 src="tools/rsrcs/icon.png" />
+</p>
+
 
 **Stepper-Motor-Controller (SMC)** is a project that provides a user-friendly driver and graphical user interface (GUI) for control of a stepper motor using and Arduino-based board in conjuction with the [Pololu DRV8825](https://www.pololu.com/product/2133) stepper driver board. 
 
