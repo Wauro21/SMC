@@ -4,14 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-numpy = "*"
-matplotlib = "*"
-pyserial = "*"
 pyside2 = "*"
+pyserial = "*"
 bitarray = "*"
 
 [dev-packages]
-ipykernel = "*"
 
 [requires]
 python_version = "3.8"
