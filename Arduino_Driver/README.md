@@ -1,8 +1,17 @@
-# Hardware Setup: 
+# Arduino Driver: 
 
 ## Index 
 
-## 1. How to connect the Arduino board and Pololu controller board
+## How does the driver works? 
+
+
+
+
+## Hardware setup
+
+In the following sections the recommended connection between the Arduino UNO and Pololu stepper driver board are showed and the steps to burn the driver
+
+### 1. How to connect the Arduino board and Pololu controller board
 
 <p align="center">
   <img height=250 src="../github_images/hardware_setup.png" />
@@ -32,5 +41,19 @@ The pinout is detailed next:
 
 All Analog pins are available for use. 
 
-## 2. Programing the arduino
+### 2. Programing the arduino
 
+To load the driver onto the Arduino board, you can use the [Arduino-IDE](https://www.arduino.cc/en/software), just use the `Arduino_Driver.ino` as the main, verify and burn!
+
+<p align="center">
+  <img  src="../github_images/arduino_burning.gif" />
+</p>
+
+
+You can check if the burning was sucessful by performing a `connect test` through the GUI:
+
+<p align="center">
+  <img  src="../github_images/connect_test.gif" />
+</p>
+
+**It takes about 5-10 seconds to perform the test, as the Arduino reboots itself when the serial port is openned.**
