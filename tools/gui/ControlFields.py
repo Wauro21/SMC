@@ -1,6 +1,7 @@
 import sys
 from PySide2.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QApplication, QFormLayout, QVBoxLayout, QLineEdit, QHBoxLayout, QSpinBox
-from smc_core.Commands import HALT_CMD, SETUP_CMD, MicroStepping, MIN_SPEED_RPM, MAX_SPEED_RPM, MIN_STEPS, MAX_STEPS, STEP_CMD, getFrequency, sendCommand
+from SMCC.Commands import HALT_CMD, SETUP_CMD, STEP_CMD, getFrequency, sendCommand
+from SMCC.Constants import MICROSTEPPING, SOFTWARE_LIMITS
 from gui.Constants import SPEED_SUFFIX
 from PySide2.QtCore import Qt, Signal
 
@@ -211,7 +212,7 @@ class ControlFields(QWidget):
         response = sendCommand(comms, HALT_CMD)
 
     def initSteps(self):
-        self.steps_field.setRange(MIN_STEPS, MAX_STEPS)
+        self.steps_field.setRange(SOFTWARE_LIMITS.MIN_STEPS.value, SOFTWARE_LIMITS.MAX_STEPS.value)
         self.steps_field.setValue(self.ctrl['steps'])
 
     def assignSteps(self):
@@ -221,7 +222,7 @@ class ControlFields(QWidget):
 
 
     def initSpeed(self):
-        self.speed_field.setRange(MIN_SPEED_RPM, MAX_SPEED_RPM)
+        self.speed_field.setRange(SOFTWARE_LIMITS.MIN_SPEED_RPM.value, SOFTWARE_LIMITS.MAX_SPEED_RPM.value)
         self.speed_field.setSuffix(SPEED_SUFFIX)
         self.speed_field.setValue(self.ctrl['speed'])
 
@@ -231,12 +232,12 @@ class ControlFields(QWidget):
         self.freq_flag = True
 
     def populateMS(self):
-        for mode in MicroStepping:
+        for mode in MICROSTEPPING:
             self.micro_stepping.addItem(mode.value[0])
 
     def assignMode(self):
         mode = self.micro_stepping.currentText()
-        for i in MicroStepping:
+        for i in MICROSTEPPING:
             if mode == i.value[0]:
                 self.ctrl['micro_stepping'] = i
         self.freq_flag = True

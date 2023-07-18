@@ -5,7 +5,7 @@ from gui.MessageBox import ErrorBox, WarningBox
 import serial
 import serial.tools.list_ports
 import time
-from smc_core.Commands import INFO_CMD, STEP_CMD, sendCommand, SETUP_CMD
+from SMCC.Commands import INFO_CMD, STEP_CMD, sendCommand, SETUP_CMD
 from bitarray.util import deserialize
 __version__ ='0.1'
 __author__ = 'maurio.aravena@sansano.usm.cl'

@@ -3,7 +3,7 @@ import os
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
 from gui.ConnectionFields import ConnectionFields
 from gui.ControlFields import ControlFields
-from smc_core.Commands import MICRO_STEPPING_DEFAULT, RESET_DEFAULT, ENABLE_DEFAULT, SLEEP_DEFAULT, MIN_SPEED_RPM, MIN_STEPS
+from SMCC.Constants import DEFAULTS, SOFTWARE_LIMITS
 from gui.CommandHistory import CommandHistory
 
 class CentralWidget(QWidget):
@@ -14,14 +14,14 @@ class CentralWidget(QWidget):
         self.driver_controls = {
             'comms': None,
             'last_cmd': None,
-            'micro_stepping': MICRO_STEPPING_DEFAULT,
-            'reset': RESET_DEFAULT,  #Logic low for reset
-            'enable': ENABLE_DEFAULT, #Logic low for enable
-            'sleep': SLEEP_DEFAULT, # Logic low for sleep
+            'micro_stepping': DEFAULTS.MICRO_STEPPING_DEFAULT,
+            'reset': DEFAULTS.RESET_DEFAULT.value,  #Logic low for reset
+            'enable': DEFAULTS.ENABLE_DEFAULT.value, #Logic low for enable
+            'sleep': DEFAULTS.SLEEP_DEFAULT.value, # Logic low for sleep
             'direction': False, #counterclock by default
             'halt': False, # Halt flag
-            'speed': MIN_SPEED_RPM, # 
-            'steps': MIN_STEPS, # Requested number of steps
+            'speed': SOFTWARE_LIMITS.MIN_SPEED_RPM.value, # 
+            'steps': SOFTWARE_LIMITS.MIN_STEPS.value, # Requested number of steps
             'freq': 0, # Frequency for steps
             'freq_counter':0,
         }
