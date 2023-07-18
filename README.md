@@ -14,3 +14,7 @@ The [driver](/driver/) for the Arduino is written in C++ and was developed using
 
 ## Index
 
+## Hardware Setup:
+
+Information about how to connect the Arduino and Pololu boards and how to burn the driver to the Arduino can be found on this section: [Hardware Setup](driver/README.md)
+
