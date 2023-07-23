@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['tools\\SMC.py'],
+    ['SMC.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -20,9 +20,9 @@ a = Analysis(
     noarchive=False,
 )
 
-a.datas += [('rsrcs\\icon.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\tools\\rsrcs\\icon.png', "DATA")]
-a.datas += [('rsrcs\\received_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\tools\\rsrcs\\received_arrow.png', "DATA")]
-a.datas += [('rsrcs\\sent_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\tools\\rsrcs\\sent_arrow.png', "DATA")]
+a.datas += [('rsrcs\\icon.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\rsrcs\\icon.png', "DATA")]
+a.datas += [('rsrcs\\received_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\rsrcs\\received_arrow.png', "DATA")]
+a.datas += [('rsrcs\\sent_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\rsrcs\\sent_arrow.png', "DATA")]
 a.datas += Tree('DEPENDENCY_LICENSES', prefix='DEPENDENCY_LICENSES\\')
 a.datas += [('LICENSE.txt', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\LICENSE', "DATA")]
 a.datas += [('COPYING_LESSER.txt', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\COPYING.LESSER', "DATA")]
@@ -45,7 +45,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['tools\\rsrcs\\icon.ico'],
+    icon=['rsrcs\\icon.ico'],
 )
 coll = COLLECT(
     exe,
