@@ -24,6 +24,7 @@ class CentralWidget(QWidget):
             'steps': SOFTWARE_LIMITS.MIN_STEPS.value, # Requested number of steps
             'freq': 0, # Frequency for steps
             'freq_counter':0,
+            'degrees_per_step':3.75, # Temporal
         }
 
         #Widgets

@@ -209,7 +209,9 @@ class ControlFields(QWidget):
 
     def haltAction(self):
         comms = self.ctrl['comms']
-        response = sendCommand(comms, HALT_CMD)
+        self.host_asks.emit(HALT_CMD)
+        response = sendCommand(comms, HALT_CMD, check=False)
+        self.controller_says.emit(response)
 
     def initSteps(self):
         self.steps_field.setRange(SOFTWARE_LIMITS.MIN_STEPS.value, SOFTWARE_LIMITS.MAX_STEPS.value)
