@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyside2 = "*"
+smcc = "*"
 pyserial = "*"
-bitarray = "*"
+pyside2 = "*"
 
 [dev-packages]
 
