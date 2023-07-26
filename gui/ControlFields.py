@@ -1,8 +1,8 @@
 import sys
-from PySide2.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QApplication, QFormLayout, QVBoxLayout, QLineEdit, QHBoxLayout, QSpinBox
+from PySide2.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QApplication, QFormLayout, QVBoxLayout, QDoubleSpinBox, QHBoxLayout, QSpinBox
 from SMCC.Commands import HALT_CMD, SETUP_CMD, STEP_CMD, getFrequency, sendCommand
 from SMCC.Constants import MICROSTEPPING, SOFTWARE_LIMITS
-from gui.Constants import SPEED_SUFFIX
+from gui.Constants import DEGREES_PER_STEP_DECIMALS, DEGREES_PER_STEP_INCREMENT, DEGREES_PER_STEP_MAX, DEGREES_PER_STEP_MIN, SPEED_SUFFIX
 from PySide2.QtCore import Qt, Signal
 
 
@@ -25,6 +25,7 @@ class ControlFields(QWidget):
 
         #Widgets
         # -> Left column
+        self.deg_per_step_field= QDoubleSpinBox(self)
         self.speed_field = QSpinBox(self)
         self.micro_stepping = QComboBox(self)
         self.steps_field = QSpinBox(self)
@@ -42,6 +43,7 @@ class ControlFields(QWidget):
         self.holding_torque = QPushButton('Holding Torque')
 
         #Init routines
+        self.initDegrees()
         self.initSteps()
         self.initSpeed()
         self.populateMS()
@@ -80,6 +82,7 @@ class ControlFields(QWidget):
         )
 
         #Slots and signals
+        self.deg_per_step_field.valueChanged.connect(self.assignDegrees)
         self.speed_field.valueChanged.connect(self.assignSpeed)
         self.steps_field.valueChanged.connect(self.assignSteps)
         self.micro_stepping.activated.connect(self.assignMode)
@@ -96,6 +99,7 @@ class ControlFields(QWidget):
 
         # -> Left column
         left_layout = QFormLayout()
+        left_layout.addRow('°/step', self.deg_per_step_field)
         left_layout.addRow('Speed:',  self.speed_field)
         left_layout.addRow('Micro Stepping:', self.micro_stepping)
         left_layout.addRow('Steps:', self.steps_field)
@@ -103,6 +107,7 @@ class ControlFields(QWidget):
 
         # -> Center column
         center_layout = QVBoxLayout()
+        center_layout.addStretch(1)
         center_layout.addWidget(self.up_btn)
         center_layout.addWidget(self.down_btn)
         center_layout.addStretch(1)
@@ -110,6 +115,7 @@ class ControlFields(QWidget):
 
         # -> Right Column
         right_layout = QVBoxLayout()
+        right_layout.addStretch(1)
         right_layout.addWidget(self.single_up_step_btn)
         right_layout.addWidget(self.single_down_step_btn)
         right_layout.addStretch(1)
@@ -216,6 +222,19 @@ class ControlFields(QWidget):
     def initSteps(self):
         self.steps_field.setRange(SOFTWARE_LIMITS.MIN_STEPS.value, SOFTWARE_LIMITS.MAX_STEPS.value)
         self.steps_field.setValue(self.ctrl['steps'])
+
+    def restoreSteps(self):
+        self.ctrl['steps'] = 0
+        self.steps_field.setValue(self.ctrl['steps'])
+
+    def initDegrees(self):
+        self.deg_per_step_field.setRange(DEGREES_PER_STEP_MIN, DEGREES_PER_STEP_MAX)
+        self.deg_per_step_field.setSingleStep(DEGREES_PER_STEP_INCREMENT)
+        self.deg_per_step_field.setDecimals(DEGREES_PER_STEP_DECIMALS)
+
+    def assignDegrees(self):
+        degrees = self.deg_per_step_field.value()
+        self.ctrl['degrees_per_step'] = degrees
 
     def assignSteps(self):
         steps = self.steps_field.value()
