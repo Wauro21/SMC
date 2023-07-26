@@ -37,7 +37,7 @@ class CentralWidget(QWidget):
 
         # Signals and Slots
         self.comsWidget.connect_signal.connect(self.unlockControls)
-        self.comsWidget.disconnect_signal.connect(self.lockControls)
+        self.comsWidget.disconnect_signal.connect(self.disconnectRoutine)
         self.controlsWidget.controller_says.connect(self.historyWidget.receivedCMD)
         self.controlsWidget.host_asks.connect(self.historyWidget.sentCMD)
 
@@ -55,6 +55,14 @@ class CentralWidget(QWidget):
         layout.addWidget(self.historyWidget)
 
         self.setLayout(layout)
+
+    def disconnectRoutine(self):
+        # Lock controls
+        self.lockControls()
+
+        # Restore clean steps from controls
+        self.controlsWidget.restoreSteps()
+
 
     def lockControls(self):
         self.controlsWidget.setEnabled(False)
