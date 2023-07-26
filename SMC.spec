@@ -20,12 +20,12 @@ a = Analysis(
     noarchive=False,
 )
 
-a.datas += [('rsrcs\\icon.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\rsrcs\\icon.png', "DATA")]
-a.datas += [('rsrcs\\received_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\rsrcs\\received_arrow.png', "DATA")]
-a.datas += [('rsrcs\\sent_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\rsrcs\\sent_arrow.png', "DATA")]
+a.datas += [('rsrcs\\icon.png', 'C:\\Users\\Mauricio_2\\Desktop\\SMC\\rsrcs\\icon.png', "DATA")]
+a.datas += [('rsrcs\\received_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SMC\\rsrcs\\received_arrow.png', "DATA")]
+a.datas += [('rsrcs\\sent_arrow.png', 'C:\\Users\\Mauricio_2\\Desktop\\SMC\\rsrcs\\sent_arrow.png', "DATA")]
 a.datas += Tree('DEPENDENCY_LICENSES', prefix='DEPENDENCY_LICENSES\\')
-a.datas += [('LICENSE.txt', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\LICENSE', "DATA")]
-a.datas += [('COPYING_LESSER.txt', 'C:\\Users\\Mauricio_2\\Desktop\\SPLAMP_MOTOR\\COPYING.LESSER', "DATA")]
+a.datas += [('LICENSE.txt', 'C:\\Users\\Mauricio_2\\Desktop\\SMC\\LICENSE', "DATA")]
+a.datas += [('COPYING_LESSER.txt', 'C:\\Users\\Mauricio_2\\Desktop\\SMC\\COPYING.LESSER', "DATA")]
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
