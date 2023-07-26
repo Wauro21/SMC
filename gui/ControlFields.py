@@ -235,6 +235,7 @@ class ControlFields(QWidget):
     def assignDegrees(self):
         degrees = self.deg_per_step_field.value()
         self.ctrl['degrees_per_step'] = degrees
+        self.freq_flag = True
 
     def assignSteps(self):
         steps = self.steps_field.value()
