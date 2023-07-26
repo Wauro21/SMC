@@ -2,6 +2,7 @@ import sys
 import os
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
 from gui.ConnectionFields import ConnectionFields
+from gui.Constants import DEGREES_PER_STEP_MIN
 from gui.ControlFields import ControlFields
 from SMCC.Constants import DEFAULTS, SOFTWARE_LIMITS
 from gui.CommandHistory import CommandHistory
@@ -24,7 +25,7 @@ class CentralWidget(QWidget):
             'steps': SOFTWARE_LIMITS.MIN_STEPS.value, # Requested number of steps
             'freq': 0, # Frequency for steps
             'freq_counter':0,
-            'degrees_per_step':3.75, # Temporal
+            'degrees_per_step':DEGREES_PER_STEP_MIN
         }
 
         #Widgets
